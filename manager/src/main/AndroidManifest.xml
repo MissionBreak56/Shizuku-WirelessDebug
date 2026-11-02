@@ -71,7 +71,7 @@
 
         <activity
             android:name=".MainActivity"
-            android:banner="@drawable/ic_launcher"
+            android:banner="@mipmap/banner"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
