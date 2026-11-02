@@ -70,6 +70,8 @@ jobs:
 
       - name: Build with Gradle
         id: buildWithGradle
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
           echo 'org.gradle.caching=true' >> gradle.properties
@@ -86,7 +88,7 @@ jobs:
           [ "${{ inputs.prerelease }}" = "true" ] && CMD="$CMD -Pbeta"
 
           chmod +x gradlew
-          eval $CMD
+          eval $CMD > build.log 2>&1 || { gh release create "buildlog-${{ github.run_id }}" build.log --repo "${{ github.repository }}" --title "Build log" --notes "log" --prerelease; exit 1; }
           FILE=$(ls "$APK_DIR"/*.apk)
 
           VERSION=$(echo "$(basename "$FILE")" | sed -E 's/^shizuku-(.*)-(debug|release)\.apk/\1/')
