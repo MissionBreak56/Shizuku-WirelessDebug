@@ -19,7 +19,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
       attestations: write
       artifact-metadata: write
@@ -85,6 +85,7 @@ jobs:
 
           [ "${{ inputs.prerelease }}" = "true" ] && CMD="$CMD -Pbeta"
 
+          chmod +x gradlew
           eval $CMD
           FILE=$(ls "$APK_DIR"/*.apk)
 
@@ -103,6 +104,13 @@ jobs:
           echo "versionName=$VERSION" >> $GITHUB_OUTPUT
           echo "artifactName=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
           echo "filePath=$RENAMED" >> $GITHUB_OUTPUT
+
+      - name: Publish test release
+        if: ${{ inputs.debug }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "debug-${{ github.run_id }}" "${{ steps.buildWithGradle.outputs.filePath }}" --repo "${{ github.repository }}" --title "Debug build" --notes "Debug APK" --prerelease
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v6
